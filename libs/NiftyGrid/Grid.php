@@ -79,7 +79,7 @@ abstract class Grid extends \Nette\Application\UI\Control
 	protected $templatePath;
 
 	/** @var string */
-	public $messageNoRecords = 'Žádné záznamy';
+	public $messageNoRecords = 'No items';
 
 	/** @var \Nette\Localization\ITranslator */
 	protected $translator;
@@ -560,11 +560,11 @@ abstract class Grid extends \Nette\Application\UI\Control
 			$filters = array();
 			foreach($this->filter as $name => $value){
 				if(!$this->columnExists($name)){
-					throw new UnknownColumnException("Neexistující sloupec $name");
+					throw new UnknownColumnException("Column $name does not exists");
 
 				}
 				if(!$this['columns-'.$name]->hasFilter()){
-					throw new UnknownFilterException("Neexistující filtr pro sloupec $name");
+					throw new UnknownFilterException("Filter for column $name does not exists");
 				}
 
 				$type = $this['columns-'.$name]->getFilterType();
@@ -579,10 +579,10 @@ abstract class Grid extends \Nette\Application\UI\Control
 						}
 						$filters[] = $filter;
 					}else{
-						throw new InvalidFilterException("Neplatný filtr");
+						throw new InvalidFilterException("Invalid filter");
 					}
 				}else{
-					throw new InvalidFilterException("Neplatný filtr");
+					throw new InvalidFilterException("Invalid filter");
 				}
 			}
 			return $this->dataSource->filterData($filters);
@@ -611,7 +611,7 @@ abstract class Grid extends \Nette\Application\UI\Control
 				}
 				$this->dataSource->orderData($order[0], $order[1]);
 			}else{
-				throw new InvalidOrderException("Neplatné seřazení.");
+				throw new InvalidOrderException("Invalid sorting.");
 			}
 		}
 		catch(InvalidOrderException $e){
@@ -740,28 +740,28 @@ abstract class Grid extends \Nette\Application\UI\Control
 		$form->addContainer($this->name);
 
 		$form[$this->name]->addContainer("rowForm");
-		$form[$this->name]['rowForm']->addSubmit("send","Uložit");
+		$form[$this->name]['rowForm']->addSubmit("send","Save");
 		$form[$this->name]['rowForm']['send']->getControlPrototype()->addClass("grid-editable");
 
 		$form[$this->name]->addContainer("filter");
-		$form[$this->name]['filter']->addSubmit("send","Filtrovat")
+		$form[$this->name]['filter']->addSubmit("send","Filter")
 			->setValidationScope(FALSE)
 			->getControlPrototype()->class('btn btn-primary');
 
 		$form[$this->name]->addContainer("action");
-		$form[$this->name]['action']->addSelect("action_name","Označené:");
-		$form[$this->name]['action']->addSubmit("send","Potvrdit")
+		$form[$this->name]['action']->addSelect("action_name","Selected:");
+		$form[$this->name]['action']->addSubmit("send","Confirm")
 			->setValidationScope(FALSE)
 			->getControlPrototype()
 			->addData("select", $form[$this->name]["action"]["action_name"]->getControl()->name);
 
 		$form[$this->name]->addContainer('perPage');
-		$form[$this->name]['perPage']->addSelect("perPage","Záznamů na stranu:", $this->perPageValues)
+		$form[$this->name]['perPage']->addSelect("perPage","Items on page:", $this->perPageValues)
 			->getControlPrototype()
 			->addClass("grid-changeperpage")
 			->addData("gridname", $this->getGridPath())
 			->addData("link", $this->link("changePerPage!"));
-		$form[$this->name]['perPage']->addSubmit("send","Ok")
+		$form[$this->name]['perPage']->addSubmit("send","OK")
 			->setValidationScope(FALSE)
 			->getControlPrototype()
 			->addClass("grid-perpagesubmit");
@@ -853,7 +853,7 @@ abstract class Grid extends \Nette\Application\UI\Control
 			}
 			$subGrid = ($gridName == $this->name) ? FALSE : TRUE;
 			if(!count($rows)){
-				throw new NoRowSelectedException("Nebyl vybrán žádný záznam.");
+				throw new NoRowSelectedException("No item selected.");
 			}
 			if($subGrid){
 				call_user_func($this[$gridName]['actions']->components[$values['action_name']]->getCallback(), $rows);
@@ -864,9 +864,9 @@ abstract class Grid extends \Nette\Application\UI\Control
 		}
 		catch(NoRowSelectedException $e){
 			if($subGrid){
-				$this[$gridName]->flashMessage("Nebyl vybrán žádný záznam.","alert-error");
+				$this[$gridName]->flashMessage("No item selected.","alert-error");
 			}else{
-				$this->flashMessage("Nebyl vybrán žádný záznam.","alert-error");
+				$this->flashMessage("No item selected.","alert-error");
 			}
 			$this->redirect("this");
 		}
