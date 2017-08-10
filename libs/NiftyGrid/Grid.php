@@ -877,6 +877,18 @@ abstract class Grid extends \Nette\Application\UI\Control
 	 */
 	public function filterFormSubmitted($values)
 	{
+		// Redirect fix
+		// See https://forum.nette.org/cs/11168-niftygrid-datagrid-pro-nette-2-s-velkou-skalou-funkci?p=6#p106108
+		// See https://forum.nette.org/cs/11168-niftygrid-datagrid-pro-nette-2-s-velkou-skalou-funkci?p=6#p106294
+		$parentPath = '';
+		if ($this->getParent()) {
+			$parentPath = $this->getParent()->lookupPath(\Nette\Application\IPresenter::class, FALSE);
+
+			if ($parentPath) {
+				$parentPath .= '-';
+			}
+		}
+
 		$filters = array();
 		$paginators = array();
 		foreach($values as $gridName => $grid){
@@ -891,18 +903,18 @@ abstract class Grid extends \Nette\Application\UI\Control
 					}
 					if($isSubGrid){
 						$gridName = $this->findSubGridPath($gridName);
-						$filters[$this->name."-".$gridName."-filter"][$name] = $value;
+						$filters[$parentPath . $this->name."-".$gridName."-filter"][$name] = $value;
 					}else{
-						$filters[$this->name."-filter"][$name] = $value;
+						$filters[$parentPath . $this->name."-filter"][$name] = $value;
 					}
 				}
 			}
 			if($isSubGrid){
 				$paginators[$this->name."-".$gridName."-paginator-page"] = NULL;
-				if(empty($filters[$this->name."-".$gridName."-filter"])) $filters[$this->name."-".$gridName."-filter"] = array();
+				if(empty($filters[$parentPath . $this->name."-".$gridName."-filter"])) $filters[$this->name."-".$gridName."-filter"] = array();
 			}else{
 				$paginators[$this->name."-paginator-page"] = NULL;
-				if(empty($filters[$this->name."-filter"])) $filters[$this->name."-filter"] = array();
+				if(empty($filters[$parentPath . $this->name."-filter"])) $filters[$this->name."-filter"] = array();
 			}
 		}
 		$this->presenter->redirect("this", array_merge($filters, $paginators));
